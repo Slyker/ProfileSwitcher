@@ -1,4 +1,4 @@
-namespace ProfileSwitcher
+namespace PfTester
 {
     internal static class Program
     {
@@ -9,9 +9,7 @@ namespace ProfileSwitcher
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-            MessageBox.Show("This intented to be a library not a standalone project. Refer to PfTester");
-            return;
-            
+            Application.Run(new Form1());
         }
     }
 }

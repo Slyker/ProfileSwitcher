@@ -1,5 +1,5 @@
-﻿using System.Data;
-using System.Reflection;
+﻿using Newtonsoft.Json;
+using System.Data;
 
 namespace ProfileSwitcher
 {
@@ -8,9 +8,11 @@ namespace ProfileSwitcher
     {
         internal static List<DataSet> DataSets { get; } = new List<DataSet>();
         public static List<DgvSet> DgvSets { get; } = new List<DgvSet>();
-        public static void Add(string _FileName, DataGridView Dgv, List<DgvColumn> dgvColumns, string SetName = "Defaut", string TableName = "Defaut")
+        public static DgvSet Add(string _FileName, List<DgvColumn> dgvColumns, string SetName = "Defaut", string TableName = "Defaut")
         {
-            DgvSets.Add(new DgvSet(_FileName, Dgv, dgvColumns, SetName, TableName));
+            DgvSet dgvSet = new DgvSet(_FileName, dgvColumns, SetName, TableName);
+            DgvSets.Add(dgvSet);
+            return dgvSet;
         }
         public static void Save(string SetName = "")
         {
@@ -46,36 +48,16 @@ namespace ProfileSwitcher
         public DataGridView Dgv { get; set; }
         public List<DgvColumn> Columns { get; set; } = new List<DgvColumn>();
 
-        public string Path { get { return FileManager.AppPath + FileName + ".xml"; } }
-        public void Save()
-        {
-            DataSet.WriteXml(Path);
-        }
-        public void Load(string? tableName = null)
-        {
-            Dgv.DataSource = null;
-            Dgv.Rows.Clear();
-            Dgv.Columns.Clear();
-            
-            if (tableName != null)
-            {
-                Dgv.DataSource = DataSet.Tables[tableName];
-            }
-            else
-            {
-                DataSet.ReadXml(Path);
-            }
-           
-        }
-        public DgvSet(string _FileName, DataGridView _Dgv, List<DgvColumn> dgvColumns, string SetName = "Defaut", string TableName = "Defaut")
+        public string Path { get { return FileManager.AppPath + FileName + ".json"; } }
+        public DgvSet(string _FileName, List<DgvColumn> dgvColumns, string SetName = "Defaut", string TableName = "Defaut")
         {
 
-            string path = FileManager.AppPath + _FileName + ".xml";
-            Dgv = _Dgv;
+            string path = FileManager.AppPath + _FileName + ".json";
             FileName = _FileName;
             Columns = dgvColumns;
-            SetName = _FileName ;
-            
+            Dgv = new DataGridView();
+            SetName = _FileName;
+
             DataSet = new DataSet(SetName);
             //DataSet.EnforceConstraints = false;
             if (File.Exists(path))
@@ -91,50 +73,167 @@ namespace ProfileSwitcher
             {
                 DataSet = ds;
             }
-            DataTable dt = AddDTable(TableName);
-            AddRow(dt,  new string[] { "Defaut", "Defaut" });
+            AddDTable(TableName);
+            //AddRow(dt, new string[] { "", "" });
             Save();
         }
-        public DataTable AddDTable(string TableName)
+        public void Save()
+        {
+            //DataSet.WriteXml(Path);
+
+
+            using (StreamWriter file = new StreamWriter(Path))
+            {
+                string json = JsonConvert.SerializeObject(DataSet, Formatting.Indented);
+                file.Write(json);
+            }
+
+
+            //DataSet dataSet = JsonConvert.DeserializeObject<DataSet>(json);
+        }
+        public DataTable? Load(string? tableName = null)
+        {
+            Dgv.DataSource = null;
+            Dgv.Rows.Clear();
+            Dgv.Columns.Clear();
+
+            if (tableName != null)
+            {
+                Dgv.DataSource = DataSet.Tables[tableName];
+                return DataSet.Tables[tableName];
+            }
+            else
+            {
+
+                DataSet? dataSet = JsonConvert.DeserializeObject<DataSet>(File.ReadAllText(Path).ToString());
+                if (dataSet != null)
+                {
+                    DataSet.Merge(dataSet);
+                }
+                return null;
+            }
+
+        }
+        public void OpenSwitcher(string TableName = "Defaut")
+        {
+            Main mainSwitcher = new Main(FileName, TableName);
+            Dgv = mainSwitcher.dataGridView1;
+            Dgv.DataSource = Load(TableName);
+            mainSwitcher.Show();
+        }
+
+        public DataTable? RemoveDTable(string? TableName)
+        {
+            if (TableName == null) { return null; }
+            DataTable dt = DataSet.Tables[TableName];
+            if (dt == null)
+            {
+
+                return null;
+            }
+            else
+            {
+                if (Dgv.DataSource == dt)
+                {
+                    DataTable dataTable = DataSet.Tables.Cast<DataTable>().First();
+                    Dgv.DataSource = dataTable;
+                    DataSet.Tables.Remove(dt);
+                    Save();
+                    return dataTable;
+                }
+                DataSet.Tables.Remove(dt);
+                Save();
+                return null;
+            }
+        }
+        public bool RenameDTable(string TableName, string newName)
         {
             DataTable dt = DataSet.Tables[TableName];
-            DataTable DataTable = dt ?? new DataTable(TableName);
+            if (dt == null)
+            {
 
-            var keys = new DataColumn[1];
+                return false;
+            }
+            else
+            {
+                try
+                {
+                    dt.TableName = newName;
+                    Save();
+                }
+                catch
+                {
+                    MessageBox.Show("Un preset porte déjà ce nom, merci d'en choisir un autre.");
+                    return false;
+                }
+
+
+                return true;
+            }
+        }
+        public void AddDTable(string TableName, bool baseRow = false)
+        {
+            
+            DataTable? dt = DataSet.Tables[TableName];
+           
+            DataTable DataTable = dt ?? new DataTable(TableName);
+            List<DataColumn> keys = new List<DataColumn>();
             DataColumn column;
-            if(dt == null)
+            if (dt == null)
             {
                 DataSet.Tables.Add(DataTable);
             }
+            string? FirstColName = null;
             foreach (DgvColumn dgvColumn in Columns)
             {
 
                 column = new DataColumn();
                 column.DataType = dgvColumn.Type;
                 column.ColumnName = dgvColumn.Name;
+                column.DefaultValue = dgvColumn.defaultValue ?? null;
                 if (!DataTable.Columns.Contains(dgvColumn.Name))
                 {
                     DataTable.Columns.Add(column);
-                    
-                }
-                
-                if (keys[0] == null)
-                {
-                    keys[0] = DataTable.Columns[dgvColumn.Name];
-                    DataTable.PrimaryKey = keys;
-                }
-            }
-            //DataTable.PrimaryKey = keys;
 
+                }
+                if (FirstColName == null)
+                {
+                    FirstColName = dgvColumn.Name;
+                }
+                if (dgvColumn.isPrimary)
+                {
+                    keys.Add(DataTable.Columns[dgvColumn.Name]);
+                }
+
+            }
+            if (keys.Count() == 0)
+            {
+                keys.Add(DataTable.Columns[FirstColName]);
+            }
+            DataTable.PrimaryKey = keys.ToArray();
+            //DataTable.PrimaryKey = keys;
+            if (baseRow)
+            {
+                string[] strs = new string[Columns.Count];
+                for (int i = 0; i < Columns.Count; i++)
+                {
+                    if(DataTable.PrimaryKey.Count() > i && DataTable.PrimaryKey[i] != null)
+                    {
+                        strs[i] = Columns[i].defaultValue?? "0";
+                    }
+                   
+                }
+
+                DataTable = AddRow(DataTable, strs);
+            }
 
             Dgv.DataSource = DataTable;
-            return DataTable;
+            Save();
+            //return;
 
         }
-        public void AddRow(DataTable dataTable, string[] items)
+        public DataTable AddRow(DataTable dataTable, string[] items)
         {
-
-
             DataRow row = dataTable.NewRow();
             int id = 0;
 
@@ -143,50 +242,27 @@ namespace ProfileSwitcher
                 row[Columns[id].Name] = item;
                 id++;
             }
-            try
-            {
-                dataTable.Rows.Add(row);
-            }
-            catch
-            {
 
-            }
-               
-            
-
+            dataTable.Rows.Add(row);
             Save();
-            Dgv.DataSource = dataTable;
+            return dataTable;
 
         }
-        //public object this[string propertyName]
-        //{
-        //    get
-        //    {
-        //        // probably faster without reflection:
-        //        // like:  return Properties.Settings.Default.PropertyValues[propertyName] 
-        //        // instead of the following
-        //        Type myType = typeof(DgvSet);
-        //        PropertyInfo myPropInfo = myType.GetProperty(propertyName);
-        //        return myPropInfo.GetValue(this, null);
-        //    }
-        //    set
-        //    {
-        //        Type myType = typeof(DgvSet);
-        //        PropertyInfo myPropInfo = myType.GetProperty(propertyName);
-        //        myPropInfo.SetValue(this, value, null);
-        //    }
-        //}
     }
 
     public class DgvColumn
     {
         public string Name { get; set; }
         public Type Type { get; set; }
+        public bool isPrimary { get; set; }
+        public string? defaultValue { get; set; } = null;
 
-        public DgvColumn(string _name, Type _Type)
+        public DgvColumn(string _name, Type _Type, bool _isPrimary = false, string? _defaultValue = null)
         {
             Name = _name;
             Type = _Type;
+            isPrimary = _isPrimary;
+            defaultValue = _defaultValue;
         }
 
     }
