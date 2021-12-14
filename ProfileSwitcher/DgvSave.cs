@@ -6,7 +6,6 @@ namespace ProfileSwitcher
 
     public static class DgvSave
     {
-        //Comment
         internal static List<DataSet> DataSets { get; } = new List<DataSet>();
         public static List<DgvSet> DgvSets { get; } = new List<DgvSet>();
         public static DgvSet Add(string _FileName, List<DgvColumn> dgvColumns, string SetName = "Defaut", string TableName = "Defaut")
