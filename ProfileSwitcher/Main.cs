@@ -10,7 +10,7 @@ namespace ProfileSwitcher
         private string FileName;
 
         public Main(string _FileName, string _PresetName)
-        {
+        {//s
             InitializeComponent();
             listBox1.MouseDoubleClick += new MouseEventHandler(listBox1_DoubleClick);
             PresetName = _PresetName;
