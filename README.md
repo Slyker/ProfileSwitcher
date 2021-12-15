@@ -6,7 +6,7 @@
 - Possibilités infinies grace à l'utilisation de DataSet
 - Mise en place rapide
 # Todo 
-- Pousser le système pour une utilisation en API
-- Système de valeur par défaut à revoir ( seulement en clé primaire???)
-- Possibilité de choisir plus précisement le dossier de sauvegarde de chaque fichier ( actuellement /app/NOM_DU_PRESET )
-- Pousser le système de récupération des données et optimiser l'utilisation des classes
+- Pousser le système pour une utilisation en API DONE
+- Système de valeur par défaut à revoir ( seulement en clé primaire???) : valeur par défaut + clé multiple DONE
+- Possibilité de choisir plus précisement le dossier de sauvegarde de chaque fichier ( actuellement /app/Settings/NOM_DU_PRESET )
+- Pousser le système de récupération des données et optimiser l'utilisation des classes DONE
