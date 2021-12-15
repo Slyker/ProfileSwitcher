@@ -1,6 +1,4 @@
 using ProfileSwitcher;
-using System.Data;
-using ProfileSwitcher;
 
 namespace PfTester
 {
@@ -21,7 +19,7 @@ namespace PfTester
                     new DataCol("Surname", typeof(string))
                 };
             });
-            
+
             repText = DataSets.Add("replacetext", () =>
             {
                 return new DataCol[]
@@ -31,8 +29,8 @@ namespace PfTester
                     new DataCol("Surname", typeof(string))
                 };
             });
-            this.Focus();
-            
+            Focus();
+
         }
 
         private void Form1_Load(object sender, EventArgs e)

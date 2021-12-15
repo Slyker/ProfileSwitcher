@@ -38,11 +38,11 @@
             textBox1.Text = defaultValue;
             if (isMessageBox)
             {
-                this.Size = new Size(513, 145);
+                Size = new Size(513, 145);
             }
-            this.MinimumSize = this.Size;
-            this.MaximumSize = this.Size;
-            this.Text = formTitle;
+            MinimumSize = Size;
+            MaximumSize = Size;
+            Text = formTitle;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -51,7 +51,7 @@
             {
                 onOk(textBox1.Text);
             }
-            this.Close();
+            Close();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -60,7 +60,7 @@
             {
                 onCancel(textBox1.Text);
             }
-            this.Close();
+            Close();
         }
 
         private void textBox1_KeyUp(object sender, KeyEventArgs e)

@@ -70,7 +70,7 @@ namespace ProfileSwitcher
             DataCol[] columns = dtc.DataCols() ?? new List<DataCol>().ToArray();
             DataTable dt = new DataTable(tableName);
             List<DataCol> dataCols = columns.ToList();
-            var tts = dataCols.Where(x => x.IsPrimary).ToList().Count;
+            int tts = dataCols.Where(x => x.IsPrimary).ToList().Count;
             if (tts == 0)
             {
                 DataCol dataCol = new DataCol("id", typeof(int), null, true, true);
@@ -137,7 +137,7 @@ namespace ProfileSwitcher
         }
         public static void Save(this DataSetC ds)
         {
-            var path = ds.Path();
+            string? path = ds.Path();
             if (!File.Exists(path)) { File.Create(path).Close(); }
             using (StreamWriter file = new StreamWriter(path))
             {
@@ -179,7 +179,7 @@ namespace ProfileSwitcher
         {
             if (dt == null) { return null; }
             if (dt.PrimaryKey == null || dt.PrimaryKey.Count() == 0) { return null; }
-            var converted = Convert.ChangeType(key, typeof(object));
+            object? converted = Convert.ChangeType(key, typeof(object));
             DataRow? dr = null;
             try
             {
@@ -192,11 +192,11 @@ namespace ProfileSwitcher
             }
             catch
             {
-                var tes = dt.PrimaryKey.Select((x) => x.ColumnName).ToList();
+                List<string>? tes = dt.PrimaryKey.Select((x) => x.ColumnName).ToList();
                 tes.ForEach((_columnName) =>
                 {
 
-                    var drNew = dt.AsEnumerable().Where(p => (p.ItemArray.Contains(converted)) || (p.Field<object>(_columnName).Equals(converted)) || (p.Field<object>(_columnName).ToString().ToLower().Contains(converted.ToString().ToLower()))).FirstOrDefault();
+                    DataRow? drNew = dt.AsEnumerable().Where(p => (p.ItemArray.Contains(converted)) || (p.Field<object>(_columnName).Equals(converted)) || (p.Field<object>(_columnName).ToString().ToLower().Contains(converted.ToString().ToLower()))).FirstOrDefault();
                     if (drNew != null)
                     {
                         dr = drNew;

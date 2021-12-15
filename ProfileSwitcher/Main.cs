@@ -32,7 +32,7 @@ namespace ProfileSwitcher
                 "Valider", "Annuler",
                 (res) =>
                 {
-                    DataTable? dt = Ds1.Tables[itemName];                    
+                    DataTable? dt = Ds1.Tables[itemName];
                     if (dt != null)
                     {
                         dt.Rename(res);
@@ -66,7 +66,7 @@ namespace ProfileSwitcher
         {
             InputBox inputBox = new InputBox("Création d'un preset", "Veuillez selectionner un nom pour votre preset", null, "Valider", "Annuler", (res) =>
             {
-               
+
                 if (Ds1 != null)
                 {
                     if (!Ds1.Tables.Contains(res))
@@ -78,7 +78,7 @@ namespace ProfileSwitcher
                     {
                         MessageBox.Show("Un preset portant existe déjà merci de réessayer");
                     }
-                  
+
                 }
             });
             inputBox.ShowDialog();
@@ -135,7 +135,7 @@ namespace ProfileSwitcher
         #region"ListBox"
         private void listBox1_DoubleClick(object sender, MouseEventArgs e)
         {
-            int index = this.listBox1.IndexFromPoint(e.Location);
+            int index = listBox1.IndexFromPoint(e.Location);
             if (index != ListBox.NoMatches)
             {
                 if (Ds1 != null && listBox1.SelectedItem != null)
@@ -158,7 +158,7 @@ namespace ProfileSwitcher
 
         private void listBox1_MouseUp(object sender, MouseEventArgs e)
         {
-            int index = this.listBox1.IndexFromPoint(e.Location);
+            int index = listBox1.IndexFromPoint(e.Location);
             if (index != ListBox.NoMatches)
             {
                 listBox1.SelectedIndex = index;
@@ -204,7 +204,7 @@ namespace ProfileSwitcher
             DataTable? dataTable2 = (DataTable)dataGridView1.DataSource;
             if (dataTable2 != null)
             {
-                this.Text = "Preset actuel : " + dataTable2.TableName;
+                Text = "Preset actuel : " + dataTable2.TableName;
             }
         }
 
@@ -253,7 +253,7 @@ namespace ProfileSwitcher
         }
         private void button6_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
         #endregion
 

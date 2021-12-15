@@ -1,17 +1,14 @@
-﻿
-using System.Xml.Serialization;
-
-
-
-public static class FileManager
+﻿public static class FileManager
 {
     public static string CurrentPath = Directory.GetCurrentDirectory();
     public static string AppPath = Directory.GetCurrentDirectory() + @"\app\";
     public static bool Init()
     {
-        List<bool> results = new List<bool>();
-        results.Add(fmDir.exist(""));
-        results.Add(fmDir.exist("Settings"));
+        List<bool> results = new List<bool>
+        {
+            fmDir.exist(""),
+            fmDir.exist("Settings")
+        };
         return results.Find(x => x == false);
     }
 
