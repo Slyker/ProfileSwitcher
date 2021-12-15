@@ -1,23 +1,35 @@
 using ProfileSwitcher;
+using System.Data;
+using ProfileSwitcher;
+
 namespace PfTester
 {
     public partial class Form1 : Form
     {
-        private DgvSet AddText;
-        private DgvSet repText;
+        private DataSetC AddText;
+        private DataSetC repText;
         public Form1()
         {
             InitializeComponent();
             FileManager.Init();
-            AddText = DgvSave.Add("addtext", new List<DgvColumn>() {
-                new DgvColumn("#",typeof(string),true,"999"),
-                new DgvColumn("Name", typeof(string)),
-                new DgvColumn("Surname", typeof(string))
+            AddText = DataSets.Add("addtext", () =>
+            {
+                return new DataCol[]
+                {
+                    new DataCol("#",typeof(string),null,true,true),
+                    new DataCol("Name", typeof(string)),
+                    new DataCol("Surname", typeof(string))
+                };
             });
-            repText = DgvSave.Add("replacetext", new List<DgvColumn>() {
-                new DgvColumn("#",typeof(string)),
-                new DgvColumn("Name", typeof(string)),
-                new DgvColumn("Surname", typeof(string))
+            
+            repText = DataSets.Add("replacetext", () =>
+            {
+                return new DataCol[]
+                {
+                    new DataCol("#",typeof(string),null,true,true),
+                    new DataCol("Name", typeof(string)),
+                    new DataCol("Surname", typeof(string))
+                };
             });
             this.Focus();
             

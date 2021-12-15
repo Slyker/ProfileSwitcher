@@ -5,7 +5,7 @@ namespace ProfileSwitcher
     public partial class Main : Form
     {
         private DataGridView Dgv;
-        private DataSet Ds1;
+        private DataSetC Ds1;
         private string PresetName;
         private string FileName;
 
@@ -15,9 +15,9 @@ namespace ProfileSwitcher
             listBox1.MouseDoubleClick += new MouseEventHandler(listBox1_DoubleClick);
             PresetName = _PresetName;
             FileName = _FileName;
-            DataSet _Ds1 = DgvSave.DgvSets.First(x => x.FileName == FileName).DataSet;
+            DataSetC _Ds1 = DataSets.dataSets.First(x => x.DataSetName == FileName);
             Dgv = dataGridView1;
-            Ds1 = _Ds1 ?? new DataSet(_FileName);
+            Ds1 = _Ds1 ?? new DataSetC(_FileName);
         }
         #region"UI ACTIONS"
         #region"Presets Actions"
@@ -32,10 +32,10 @@ namespace ProfileSwitcher
                 "Valider", "Annuler",
                 (res) =>
                 {
-                    DgvSet? dgvSet = DgvSave.DgvSets.Find(x => x.FileName == FileName);
-                    if (dgvSet != null)
+                    DataTable? dt = Ds1.Tables[itemName];                    
+                    if (dt != null)
                     {
-                        dgvSet.RenameDTable(itemName, res);
+                        dt.Rename(res);
                         refreshUi();
                     }
                     listBox1.SelectedIndex = itemIndex;
@@ -53,10 +53,10 @@ namespace ProfileSwitcher
                 "Supprimer", "Annuler",
                 (res) =>
                 {
-                    DgvSet? dgvSet = DgvSave.DgvSets.Find(x => x.FileName == FileName);
-                    if (dgvSet != null)
+                    DataTable? dt = Ds1.Tables[itemName];
+                    if (dt != null)
                     {
-                        dgvSet.RemoveDTable(itemName);
+                        dt.Remove();
                         refreshUi();
                     }
                 }, null, true);
@@ -66,12 +66,12 @@ namespace ProfileSwitcher
         {
             InputBox inputBox = new InputBox("Création d'un preset", "Veuillez selectionner un nom pour votre preset", null, "Valider", "Annuler", (res) =>
             {
-                DgvSet? dgvSet = DgvSave.DgvSets.Find(x => x.FileName == FileName);
-                if (dgvSet != null)
+               
+                if (Ds1 != null)
                 {
-                    if (!dgvSet.DataSet.Tables.Contains(res))
+                    if (!Ds1.Tables.Contains(res))
                     {
-                        dgvSet.AddDTable(res, true);
+                        Ds1.AddTab(res);
                         refreshUi();
                     }
                     else
@@ -138,16 +138,15 @@ namespace ProfileSwitcher
             int index = this.listBox1.IndexFromPoint(e.Location);
             if (index != ListBox.NoMatches)
             {
-                DgvSet? dgvSet = DgvSave.DgvSets.Find(x => x.FileName == FileName);
-                if (dgvSet != null && listBox1.SelectedItem != null)
+                if (Ds1 != null && listBox1.SelectedItem != null)
                 {
-                    if (Dgv.DataSource == dgvSet.DataSet.Tables[listBox1.SelectedItem.ToString()])
+                    if (Dgv.DataSource == Ds1.Tables[listBox1.SelectedItem.ToString()])
                     {
-                        dgvSet.Save();
+                        Ds1.Save();
                     }
                     else
                     {
-                        dataGridView1.DataSource = dgvSet.Load(listBox1.SelectedItem.ToString());
+                        Ds1.Tables[listBox1.SelectedItem.ToString()].Bind(dataGridView1);
                     }
                 }
             }
@@ -232,7 +231,7 @@ namespace ProfileSwitcher
         #region"Buttons"
         private void button2_Click(object sender, EventArgs e)
         {
-            DgvSave.Save();
+            Ds1.Save();
         }
 
         private void button3_Click(object sender, EventArgs e)
